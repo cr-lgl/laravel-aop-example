@@ -1,0 +1,40 @@
+version: '3.7'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  workspace:
+    tty: true
+    build:
+      context: ./workspace
+      dockerfile: ./Dockerfile
+      args:
+        PHP_VERSION: '7.4.9'
+        APP_USER_ID: '${APP_USER_ID}'
+        APP_GROUP_ID: '${APP_GROUP_ID}'
+    volumes:
+      - ${APP_PATH}:/var/www/html
+    networks:
+      - backend
+    ports:
+    - ${WORKSPACE_PORT}:8000
+
+  mariadb:
+    build:
+      context: ./mariadb
+      dockerfile: ./Dockerfile
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MARIADB_DATABASE}
+      - MYSQL_USER=${MARIADB_USER}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    volumes:
+      - ${APP_DATA_PATH}/mariadb/var/lib/mysql:/var/lib/mysql:delegated
+    networks:
+      - backend
+    ports:
+      - ${MARIADB_PORT}:3306
+
+
