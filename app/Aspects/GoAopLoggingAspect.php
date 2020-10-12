@@ -16,17 +16,17 @@ use Psr\Log\LoggerInterface;
 class GoAopLoggingAspect implements Aspect
 {
     /**
-     * @var LoggerInterface
+     * @var AspectPropertyFactory
      */
-    private LoggerInterface $logger;
+    private AspectPropertyFactory $propertyFactory;
 
     /**
      * GoAopLoggingAspect constructor.
-     * @param LoggerInterface $logger
+     * @param AspectPropertyFactory $propertyFactory
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(AspectPropertyFactory $propertyFactory)
     {
-        $this->logger = $logger;
+        $this->propertyFactory = $propertyFactory;
     }
 
     /**
@@ -36,8 +36,13 @@ class GoAopLoggingAspect implements Aspect
      */
     public function afterMethod(MethodInvocation $invocation)
     {
+        /**
+         * @var LoggerInterface $logger
+         */
+        $logger = $this->propertyFactory->make(LoggerInterface::class);
+
         [$email] = $invocation->getArguments();
 
-        $this->logger->info("Created User: {$email}");
+        $logger->info("Created User: {$email}");
     }
 }

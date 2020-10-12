@@ -18,17 +18,17 @@ use Throwable;
 class GoAopTransactionAspect implements Aspect
 {
     /**
-     * @var ConnectionResolverInterface
+     * @var AspectPropertyFactory
      */
-    private ConnectionResolverInterface $connectionResolver;
+    private AspectPropertyFactory $propertyFactory;
 
     /**
      * GoAopTransactionAspect constructor.
-     * @param ConnectionResolverInterface $connectionResolver
+     * @param AspectPropertyFactory $propertyFactory
      */
-    public function __construct(ConnectionResolverInterface $connectionResolver)
+    public function __construct(AspectPropertyFactory $propertyFactory)
     {
-        $this->connectionResolver = $connectionResolver;
+        $this->propertyFactory = $propertyFactory;
     }
 
     /**
@@ -39,14 +39,19 @@ class GoAopTransactionAspect implements Aspect
      */
     public function aroundTransactional(MethodInvocation $invocation)
     {
-        $this->connectionResolver->connection()->beginTransaction();
+        /**
+         * @var ConnectionResolverInterface $connectionResolver
+         */
+        $connectionResolver = $this->propertyFactory->make(ConnectionResolverInterface::class);
+
+        $connectionResolver->connection()->beginTransaction();
 
         try {
             $response = $invocation->proceed();
 
-            $this->connectionResolver->connection()->commit();
+            $connectionResolver->connection()->commit();
         } catch (Throwable $exception) {
-            $this->connectionResolver->connection()->rollBack();
+            $connectionResolver->connection()->rollBack();
 
             throw new RuntimeException('Oops, something went wrong', 0, $exception);
         }
