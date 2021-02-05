@@ -4,7 +4,7 @@ Laravel Aspect-oriented programming Example.
 ## Run
 ```bash
 cp .env.exmaple .env
-cp docker/.env.exmaple docker/.env
+cp docker/.env.example docker/.env
 
 make start
 make composer
